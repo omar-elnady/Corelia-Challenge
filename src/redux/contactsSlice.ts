@@ -18,12 +18,6 @@ const getInitialState = (): ContactsState => {
   };
 };
 
-const reOrderContacts = (contacts: Contact[]) =>
-  contacts.map((contact, index) => ({
-    ...contact,
-    order: index + 1,
-  }));
-
 const initialState: ContactsState = getInitialState();
 
 const contactsSlice = createSlice({
@@ -32,7 +26,6 @@ const contactsSlice = createSlice({
   reducers: {
     addContact: (state, action: PayloadAction<Contact>) => {
       state.contacts.push(action.payload);
-      state.contacts = reOrderContacts(state.contacts);
       localStorage.setItem("contacts", JSON.stringify(state.contacts));
     },
     updateContact: (state, action: PayloadAction<Contact>) => {
@@ -43,10 +36,24 @@ const contactsSlice = createSlice({
       }
     },
     deleteContact: (state, action: PayloadAction<string>) => {
-      state.contacts = reOrderContacts(
-        state.contacts.filter((c) => c.id !== action.payload)
+      const contactToDelete = state.contacts.find(
+        (c) => c.id === action.payload
       );
-      localStorage.setItem("contacts", JSON.stringify(state.contacts));
+      if (contactToDelete) {
+        const remainingContacts = state.contacts.filter(
+          (c) => c.id !== action.payload
+        );
+        const userContacts = remainingContacts
+          .filter((c) => c.userId === contactToDelete.userId)
+          .sort((a, b) => a.order - b.order)
+          .map((c, index) => ({ ...c, order: index + 1 }));
+        const otherContacts = remainingContacts.filter(
+          (c) => c.userId !== contactToDelete.userId
+        );
+        state.contacts = [...otherContacts, ...userContacts];
+
+        localStorage.setItem("contacts", JSON.stringify(state.contacts));
+      }
     },
   },
 });

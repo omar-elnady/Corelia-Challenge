@@ -96,7 +96,6 @@ export const ContactFormDialog: React.FC<ContactFormDialogProps> = ({
                                         if (!/^\d+$/.test(value)) {
                                             return 'Phone number must contain only digits';
                                         }
-                                        // Check for duplicate phone number
                                         const isDuplicate = existingContacts.some(c =>
                                             c.phoneNumber === value && c.id !== editingContact?.id
                                         );

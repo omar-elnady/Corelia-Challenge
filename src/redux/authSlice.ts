@@ -11,16 +11,19 @@ interface AuthState {
   currentUser: User | null;
   isAuthenticated: boolean;
   users: User[];
+  rememberedEmail: string | null;
 }
 
 const getInitialState = (): AuthState => {
   const storedUser = localStorage.getItem("currentUser");
   const storedUsers = localStorage.getItem("users");
+  const rememberedEmail = localStorage.getItem("rememberedEmail");
 
   return {
     currentUser: storedUser ? JSON.parse(storedUser) : null,
     isAuthenticated: !!storedUser,
     users: storedUsers ? JSON.parse(storedUsers) : [],
+    rememberedEmail: rememberedEmail || null,
   };
 };
 
@@ -39,9 +42,13 @@ const authSlice = createSlice({
     },
     login: (
       state,
-      action: PayloadAction<{ email: string; password: string }>
+      action: PayloadAction<{
+        email: string;
+        password: string;
+        rememberMe?: boolean;
+      }>
     ) => {
-      const { email, password } = action.payload;
+      const { email, password, rememberMe } = action.payload;
       const user = state.users.find(
         (u) => u.email === email && u.password === password
       );
@@ -50,6 +57,14 @@ const authSlice = createSlice({
         state.currentUser = user;
         state.isAuthenticated = true;
         localStorage.setItem("currentUser", JSON.stringify(current(user)));
+
+        if (rememberMe) {
+          state.rememberedEmail = email;
+          localStorage.setItem("rememberedEmail", email);
+        } else {
+          state.rememberedEmail = null;
+          localStorage.removeItem("rememberedEmail");
+        }
       } else {
         state.currentUser = null;
         state.isAuthenticated = false;

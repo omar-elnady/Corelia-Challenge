@@ -1,4 +1,5 @@
-import { useForm, FormProvider } from "react-hook-form";
+import { useForm, FormProvider, Controller } from "react-hook-form";
+import { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthLayout } from "@/layouts/auth-layout";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
@@ -24,17 +25,24 @@ interface LoginFormValues {
 export default function LoginPage() {
     const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
+    const { users, rememberedEmail } = useSelector((state: RootState) => state.auth);
+
     const methods = useForm<LoginFormValues>({
         defaultValues: {
-            email: "",
+            email: rememberedEmail || "",
             password: "",
-            rememberMe: false,
+            rememberMe: !!rememberedEmail,
         },
     });
 
-    const { users } = useSelector((state: RootState) => state.auth);
-
     const { formState: { isSubmitting } } = methods;
+
+    useEffect(() => {
+        if (rememberedEmail) {
+            methods.setValue('email', rememberedEmail);
+            methods.setValue('rememberMe', true);
+        }
+    }, [rememberedEmail, methods]);
 
     const onSubmit = async (data: LoginFormValues) => {
         await new Promise(resolve => setTimeout(resolve, 1000));
@@ -51,7 +59,12 @@ export default function LoginPage() {
             return;
         }
 
-        dispatch(login({ email: data.email, password: data.password }));
+        dispatch(login({
+            email: data.email,
+            password: data.password,
+            rememberMe: data.rememberMe
+        }));
+
         toast.success(`Welcome back, ${userByEmail.name}!`);
         navigate("/");
     };
@@ -94,9 +107,19 @@ export default function LoginPage() {
                             </div>
 
                             <div className="flex items-center justify-between space-x-2">
-                                <div className="flex items-center  space-x-2">
-                                    <Checkbox className={` ${methods.formState.errors.rememberMe ? "border-destructive" : ""}`} id="rememberMe" {...methods.register("rememberMe")} />
-                                    <Label htmlFor="rememberMe" className="text-sm font-normal text-indigo-700">
+                                <div className="flex items-center space-x-2">
+                                    <Controller
+                                        name="rememberMe"
+                                        control={methods.control}
+                                        render={({ field }) => (
+                                            <Checkbox
+                                                id="rememberMe"
+                                                checked={field.value}
+                                                onCheckedChange={field.onChange}
+                                            />
+                                        )}
+                                    />
+                                    <Label htmlFor="rememberMe" className="text-sm font-normal text-indigo-700 cursor-pointer">
                                         Remember me
                                     </Label>
                                 </div>
