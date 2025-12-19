@@ -10,7 +10,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { ArrowUpDown, ChevronLeft, ChevronRight, Pencil, Trash } from 'lucide-react';
 
-export interface Column<T = any> {
+export interface Column<T = unknown> {
     key: keyof T;
     label: string;
     sortable?: boolean;
@@ -87,7 +87,7 @@ const TableComponent = <T extends { id: string | number }>({
                                         <TableRow key={item.id || index}>
                                             {columns.map((col, colIndex) => (
                                                 <TableCell className="text-center" key={colIndex}>
-                                                    {item[col.key]}
+                                                    {String(item[col.key])}
                                                 </TableCell>
                                             ))}
                                             {(onEdit || onDelete) && (
@@ -107,7 +107,7 @@ const TableComponent = <T extends { id: string | number }>({
                                                             <Button
                                                                 variant="ghost"
                                                                 size="icon"
-                                                                onClick={() => onDelete(item.id)}
+                                                                onClick={() => onDelete(String(item.id))}
                                                                 className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
                                                             >
                                                                 <Trash className="h-4 w-4" />
