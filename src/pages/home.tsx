@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'sonner';
 import { Navbar } from '@/components/navbar';
@@ -16,46 +16,57 @@ export default function HomePage() {
     const { currentUser } = useSelector((state: RootState) => state.auth);
     const { contacts } = useSelector((state: RootState) => state.contacts);
 
-    // State
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [isDeleteOpen, setIsDeleteOpen] = useState(false);
     const [editingContact, setEditingContact] = useState<Contact | null>(null);
     const [contactToDelete, setContactToDelete] = useState<string | null>(null);
 
-    const [sortBy, setSortBy] = useState<'order' | 'name'>('order');
-    const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
-    const [currentPage, setCurrentPage] = useState(1);
+    const [sortBy, setSortBy] = useState<'order' | 'name'>(() => {
+        const saved = localStorage.getItem('contacts_sortBy');
+        return (saved === 'order' || saved === 'name') ? saved : 'order';
+    });
+    const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>(() => {
+        const saved = localStorage.getItem('contacts_sortOrder');
+        return (saved === 'asc' || saved === 'desc') ? saved : 'asc';
+    });
+    const [currentPage, setCurrentPage] = useState(() => {
+        const saved = localStorage.getItem('contacts_currentPage');
+        return saved ? parseInt(saved, 10) : 1;
+    });
     const [itemsPerPage] = useState(5);
 
-    const userContacts = contacts.filter(c => c.userId === currentUser?.email);
+    useEffect(() => localStorage.setItem('contacts_sortBy', sortBy), [sortBy]);
+    useEffect(() => localStorage.setItem('contacts_sortOrder', sortOrder), [sortOrder]);
+    useEffect(() => localStorage.setItem('contacts_currentPage', String(currentPage)), [currentPage]);
 
-    const sortedContacts = [...userContacts].sort((a, b) => {
-        if (sortBy === 'order') {
-            return sortOrder === 'asc'
-                ? a.order - b.order
-                : b.order - a.order;
-        } else {
-            return sortOrder === 'asc'
-                ? a.name.localeCompare(b.name)
-                : b.name.localeCompare(a.name);
-        }
-    });
+    const userContacts = useMemo(() => {
+        return contacts.filter(c => c.userId === currentUser?.email);
+    }, [contacts, currentUser?.email]);
 
-    const totalPages = Math.ceil(sortedContacts.length / itemsPerPage);
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const currentData = sortedContacts.slice(startIndex, startIndex + itemsPerPage);
+    const sortedContacts = useMemo(() => {
+        return [...userContacts].sort((a, b) => {
+            if (sortBy === 'order') {
+                return sortOrder === 'asc' ? a.order - b.order : b.order - a.order;
+            } else {
+                return sortOrder === 'asc' ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name);
+            }
+        });
+    }, [userContacts, sortBy, sortOrder]);
 
-    const openAddModal = () => {
+    const totalPages = useMemo(() => Math.ceil(sortedContacts.length / itemsPerPage), [sortedContacts.length, itemsPerPage]);
+    const startIndex = useMemo(() => (currentPage - 1) * itemsPerPage, [currentPage, itemsPerPage]);
+    const currentData = useMemo(() => sortedContacts.slice(startIndex, startIndex + itemsPerPage), [sortedContacts, startIndex, itemsPerPage]);
+    const openAddModal = useCallback(() => {
         setEditingContact(null);
         setIsFormOpen(true);
-    };
+    }, []);
 
-    const openEditModal = (contact: Contact) => {
+    const openEditModal = useCallback((contact: Contact) => {
         setEditingContact(contact);
         setIsFormOpen(true);
-    };
+    }, []);
 
-    const onSubmit = (data: ContactFormValues) => {
+    const onSubmit = useCallback((data: ContactFormValues) => {
         if (!currentUser) return;
 
         if (editingContact) {
@@ -81,45 +92,46 @@ export default function HomePage() {
             setCurrentPage(newTotalPages);
         }
         setIsFormOpen(false);
-    };
+    }, [currentUser, editingContact, dispatch, userContacts.length, itemsPerPage]);
 
-    const confirmDelete = (id: string) => {
+    const confirmDelete = useCallback((id: string) => {
         setContactToDelete(id);
         setIsDeleteOpen(true);
-    };
+    }, []);
 
-    const executeDelete = () => {
+    const executeDelete = useCallback(() => {
         if (contactToDelete) {
             dispatch(deleteContact(contactToDelete));
             toast.success("Contact deleted successfully");
             setIsDeleteOpen(false);
             setContactToDelete(null);
-            if (currentData.length === 1 && currentPage > 1) {
+
+            const itemsOnCurrentPage = sortedContacts.slice(startIndex, startIndex + itemsPerPage).length;
+            if (itemsOnCurrentPage === 1 && currentPage > 1) {
                 setCurrentPage(prev => prev - 1);
             }
         }
-    };
-
-    const toggleSortByOrder = () => {
+    }, [contactToDelete, dispatch, sortedContacts, startIndex, itemsPerPage, currentPage]);
+    const toggleSortByOrder = useCallback(() => {
         if (sortBy === 'order') {
             setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
         } else {
             setSortBy('order');
             setSortOrder('asc');
         }
-    };
+    }, [sortBy]);
 
-    const toggleSortByName = () => {
+    const toggleSortByName = useCallback(() => {
         if (sortBy === 'name') {
             setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
         } else {
             setSortBy('name');
             setSortOrder('asc');
         }
-    };
+    }, [sortBy]);
 
     return (
-        <div className="min-h-screen flex flex-col ">
+        <div className="min-h-screen flex flex-col">
             <Navbar />
             <main className="flex-1 container mx-auto px-4 sm:px-20 py-4 sm:py-6 space-y-4 sm:space-y-6">
                 <Header title="Contacts" />
@@ -151,6 +163,7 @@ export default function HomePage() {
                     itemsPerPage={itemsPerPage}
                     sortOrder={sortOrder}
                     sortBy={sortBy}
+                    noDataMessage="No contacts found"
                 />
             </main>
 

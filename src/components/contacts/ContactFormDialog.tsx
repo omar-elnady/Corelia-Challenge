@@ -84,9 +84,17 @@ export const ContactFormDialog: React.FC<ContactFormDialogProps> = ({
                                 placeholder="Enter Phone Number (eg: 01234567890)"
                                 {...register('phoneNumber', {
                                     required: 'Phone number is required',
-                                    pattern: {
-                                        value: /^(010|011|012|015)\d{8}$/,
-                                        message: 'Must start with 010, 011, 012, or 015'
+                                    validate: (value) => {
+                                        if (!/^(010|011|012|015)/.test(value)) {
+                                            return 'Must start with 010, 011, 012, or 015';
+                                        }
+                                        if (value.length !== 11) {
+                                            return 'Phone number must be exactly 11 digits';
+                                        }
+                                        if (!/^\d+$/.test(value)) {
+                                            return 'Phone number must contain only digits';
+                                        }
+                                        return true;
                                     }
                                 })}
                                 className={`pl-14 ${errors.phoneNumber ? 'border-red-500' : ''}`}

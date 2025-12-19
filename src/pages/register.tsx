@@ -70,7 +70,7 @@ export default function RegisterPage() {
                 </CardHeader>
                 <CardContent className="grid gap-4">
                     <FormProvider {...methods}>
-                        <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-4">
+                        <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-3">
                             <InputField
                                 placeholder="Full Name"
                                 {...methods.register("name", {
@@ -79,6 +79,15 @@ export default function RegisterPage() {
                                         value: 3,
                                         message: "Name must be at least 3 characters",
                                     },
+                                    validate: (value) => {
+                                        if (/^\d/.test(value)) {
+                                            return "Name cannot start with a number";
+                                        }
+                                        if (!/^[A-Za-z][A-Za-z0-9\- ]*$/.test(value)) {
+                                            return "Name can only contain letters, numbers, spaces, and hyphens";
+                                        }
+                                        return true;
+                                    }
                                 })}
                             />
                             <InputField
@@ -87,7 +96,7 @@ export default function RegisterPage() {
                                 {...methods.register("email", {
                                     required: "Email is required",
                                     pattern: {
-                                        value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                                        value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.org|com|net|edu|gov|mil$/i,
                                         message: "Invalid email address",
                                     },
                                 })}
@@ -97,10 +106,28 @@ export default function RegisterPage() {
                                 placeholder="Password"
                                 {...methods.register("password", {
                                     required: "Password is required",
-                                    minLength: {
-                                        value: 8,
-                                        message: "Password must be at least 8 characters",
-                                    },
+                                    validate: (value) => {
+                                        const errors = [];
+
+                                        if (value.length < 8) {
+                                            errors.push("at least 8 characters");
+                                        }
+                                        if (!/[A-Z]/.test(value)) {
+                                            errors.push("one uppercase letter");
+                                        }
+                                        if (!/[a-z]/.test(value)) {
+                                            errors.push("one lowercase letter");
+                                        }
+                                        if (!/[!@#$%^&*(),.?":{}|<>]/.test(value)) {
+                                            errors.push("one special character");
+                                        }
+
+                                        if (errors.length > 0) {
+                                            return `Password must contain: ${errors.join(', ')}`;
+                                        }
+
+                                        return true;
+                                    }
                                 })}
                             />
                             <div className="flex justify-center">

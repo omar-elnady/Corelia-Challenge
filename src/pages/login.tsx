@@ -70,7 +70,7 @@ export default function LoginPage() {
                 </CardHeader>
                 <CardContent className="grid gap-4">
                     <FormProvider {...methods}>
-                        <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-4 " >
+                        <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-3 " >
                             <InputField
                                 type="email"
                                 placeholder="Email Address"

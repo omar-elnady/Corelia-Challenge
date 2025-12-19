@@ -31,6 +31,7 @@ interface TableComponentProps<T> {
     sortOrder?: 'asc' | 'desc';
     sortBy?: string;
     loading?: boolean;
+    noDataMessage?: string;
 }
 
 const TableComponent = <T extends { id: string | number }>({
@@ -46,7 +47,8 @@ const TableComponent = <T extends { id: string | number }>({
     itemsPerPage = 5,
     sortOrder,
     sortBy,
-    loading = false
+    loading = false,
+    noDataMessage,
 }: TableComponentProps<T>) => {
     return (
         <React.Fragment>
@@ -124,7 +126,7 @@ const TableComponent = <T extends { id: string | number }>({
                                             colSpan={columns.length + (onEdit || onDelete ? 1 : 0)}
                                             className="h-24 text-center text-muted-foreground"
                                         >
-                                            No entries found.
+                                            {noDataMessage ? noDataMessage : "No entries found."}
                                         </TableCell>
                                     </TableRow>
                                 )}
