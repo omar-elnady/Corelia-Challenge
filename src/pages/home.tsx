@@ -8,8 +8,8 @@ import type { RootState } from '@/redux/store';
 import { Plus } from 'lucide-react';
 import Header from '@/components/Header';
 import Table from '@/components/table';
-import { ContactFormDialog, type ContactFormValues } from '@/components/contacts/ContactFormDialog';
-import { DeleteConfirmationDialog } from '@/components/contacts/DeleteConfirmationDialog';
+import { ContactFormDialog, type ContactFormValues } from '@/components/ContactFormDialog';
+import { DeleteConfirmationDialog } from '@/components/DeleteConfirmationDialog';
 
 export default function HomePage() {
     const dispatch = useDispatch();
