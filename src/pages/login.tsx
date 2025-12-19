@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthLayout } from "@/layouts/auth-layout";
@@ -9,9 +8,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Loader2 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import logo from "@/assets/Corelia_RICOH_logo.svg";
-import { useDispatch } from 'react-redux';
-import type { AppDispatch } from '@/redux/store';
+import { useDispatch, useSelector } from 'react-redux';
+import type { RootState, AppDispatch } from '@/redux/store';
 import { login } from '@/redux/authSlice';
+import { toast } from 'sonner';
 
 
 
@@ -24,8 +24,6 @@ interface LoginFormValues {
 export default function LoginPage() {
     const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
-    const [isLoading, setIsLoading] = useState(false);
-
     const methods = useForm<LoginFormValues>({
         defaultValues: {
             email: "",
@@ -34,17 +32,33 @@ export default function LoginPage() {
         },
     });
 
+    const { users } = useSelector((state: RootState) => state.auth);
+
+    const { formState: { isSubmitting } } = methods;
+
     const onSubmit = async (data: LoginFormValues) => {
-        setIsLoading(true);
         await new Promise(resolve => setTimeout(resolve, 1000));
-        dispatch(login(data.email));
-        setIsLoading(false);
+
+        const userByEmail = users.find(u => u.email === data.email);
+
+        if (!userByEmail) {
+            toast.error("User not found");
+            return;
+        }
+
+        if (userByEmail.password !== data.password) {
+            toast.error("Wrong password");
+            return;
+        }
+
+        dispatch(login({ email: data.email, password: data.password }));
+        toast.success("Welcome back!");
         navigate("/");
     };
 
     return (
         <AuthLayout>
-            <Card className="w-full bg-white">
+            <Card className="w-full md:h-fit h-3/4 md:block flex flex-col justify-center  bg-white">
                 <CardHeader className="space-y-1">
                     <div className="flex justify-center ">
                         <img
@@ -97,11 +111,11 @@ export default function LoginPage() {
                             </div>
 
                             <div className="flex justify-center">
-                                <Button className="w-3/4 py-6 bg-teal-600 hover:bg-teal-700 text-white font-semibold text-lg" type="submit" disabled={isLoading}>
-                                    {isLoading && (
+                                <Button className="w-3/4 py-6 bg-teal-600 hover:bg-teal-700 text-white font-semibold text-lg" type="submit" disabled={isSubmitting}>
+                                    {isSubmitting && (
                                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                                     )}
-                                    {isLoading ? "Logging in..." : "Log in"}
+                                    {isSubmitting ? "Logging in..." : "Log in"}
                                 </Button>
                             </div>
                         </form>
