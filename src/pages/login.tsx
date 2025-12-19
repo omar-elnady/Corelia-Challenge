@@ -52,7 +52,7 @@ export default function LoginPage() {
         }
 
         dispatch(login({ email: data.email, password: data.password }));
-        toast.success("Welcome back!");
+        toast.success(`Welcome back, ${userByEmail.name}!`);
         navigate("/");
     };
 

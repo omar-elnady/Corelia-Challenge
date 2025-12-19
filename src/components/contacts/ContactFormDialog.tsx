@@ -23,13 +23,15 @@ interface ContactFormDialogProps {
     onOpenChange: (open: boolean) => void;
     editingContact: Contact | null;
     onSave: (data: ContactFormValues) => void;
+    existingContacts: Contact[];
 }
 
 export const ContactFormDialog: React.FC<ContactFormDialogProps> = ({
     open,
     onOpenChange,
     editingContact,
-    onSave
+    onSave,
+    existingContacts
 }) => {
     const { register, handleSubmit, reset, formState: { errors } } = useForm<ContactFormValues>();
 
@@ -93,6 +95,13 @@ export const ContactFormDialog: React.FC<ContactFormDialogProps> = ({
                                         }
                                         if (!/^\d+$/.test(value)) {
                                             return 'Phone number must contain only digits';
+                                        }
+                                        // Check for duplicate phone number
+                                        const isDuplicate = existingContacts.some(c =>
+                                            c.phoneNumber === value && c.id !== editingContact?.id
+                                        );
+                                        if (isDuplicate) {
+                                            return 'This phone number already exists in your contacts';
                                         }
                                         return true;
                                     }

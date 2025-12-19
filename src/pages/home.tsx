@@ -172,6 +172,7 @@ export default function HomePage() {
                 onOpenChange={setIsFormOpen}
                 editingContact={editingContact}
                 onSave={onSubmit}
+                existingContacts={userContacts}
             />
 
             <DeleteConfirmationDialog
