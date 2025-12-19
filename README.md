@@ -127,7 +127,6 @@ Choose your preferred method to run the application:
 src/
 ├── components/          # Reusable UI components
 │   ├── ui/             # shadcn/ui components
-│   └── contacts/       # Contact-specific components
 ├── pages/              # Page components
 │   ├── home.tsx        # Main contacts page
 │   ├── login.tsx       # Login page
