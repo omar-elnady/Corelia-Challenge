@@ -7,12 +7,14 @@ import { Button } from "@/components/ui/button";
 
 interface InputFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
     name: string;
+    prefixText?: string;
 }
 
 export function InputField({
     className,
     type = "text",
     name,
+    prefixText,
     ...props
 }: InputFieldProps) {
     const {
@@ -26,10 +28,19 @@ export function InputField({
     return (
         <div className="space-y-2">
             <div className="relative">
+                {prefixText && (
+                    <span className="absolute left-6 top-1/2 -translate-y-1/2 text-blue-600 font-bold z-10 pointer-events-none">
+                        {prefixText}
+                    </span>
+                )}
                 <Input
                     id={name}
                     type={isPassword ? (showPassword ? "text" : "password") : type}
-                    className={cn(errorMessage && "border-red-200", className)}
+                    className={cn(
+                        errorMessage && "border-red-200",
+                        prefixText && "pl-14",
+                        className
+                    )}
                     name={name}
                     {...props}
                 />
