@@ -120,12 +120,12 @@ export const ContactFormDialog: React.FC<ContactFormDialogProps> = ({
                             <Button
                                 type="button"
                                 variant="outline"
-                                className="cursor-pointer"
+                                className="cursor-pointer bg-gray-200 text-muted-foreground hover:bg-gray-100 hover:text-gray-800"
                                 onClick={() => onOpenChange(false)}
                             >
                                 Cancel
                             </Button>
-                            <Button type="submit" className="cursor-pointer bg-blue-600">
+                            <Button type="submit" className="cursor-pointer bg-blue-600 hover:bg-blue-700">
                                 {editingContact ? 'Save Changes' : 'Add Contact'}
                             </Button>
                         </DialogFooter>

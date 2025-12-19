@@ -64,10 +64,10 @@ const TableComponent = <T extends { id: string | number }>({
                                                 <Button
                                                     variant="ghost"
                                                     onClick={col.onSort}
-                                                    className={`data-[state=open]:bg-accent hover:bg-transparent text-black font-bold}`}
+                                                    className="data-[state=open]:bg-accent hover:bg-transparent text-black font-bold "
                                                 >
                                                     {col.label}
-                                                    <ArrowUpDown className={`ml-2 h-4 w-4 ${sortBy === col.key && sortOrder === 'desc' ? 'rotate-180' : ''} transition-transform`} />
+                                                    <ArrowUpDown className={`ml-2 h-4 w-4 relative ${sortBy === col.key && sortOrder === 'desc' ? 'rotate-180' : ''} transition-transform`} />
                                                 </Button>
                                             ) : (
                                                 col.label
@@ -100,7 +100,7 @@ const TableComponent = <T extends { id: string | number }>({
                                                                 variant="ghost"
                                                                 size="icon"
                                                                 onClick={() => onEdit(item)}
-                                                                className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                                                                className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50 cursor-pointer"
                                                             >
                                                                 <Pencil className="h-4 w-4" />
                                                             </Button>
@@ -110,7 +110,7 @@ const TableComponent = <T extends { id: string | number }>({
                                                                 variant="ghost"
                                                                 size="icon"
                                                                 onClick={() => onDelete(String(item.id))}
-                                                                className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
+                                                                className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50 cursor-pointer"
                                                             >
                                                                 <Trash className="h-4 w-4" />
                                                             </Button>
